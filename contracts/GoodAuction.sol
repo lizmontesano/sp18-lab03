@@ -15,6 +15,15 @@ contract GoodAuction is AuctionInterface {
 		allow people to retrieve their funds  */
 	function bid() payable external returns(bool) {
 		// YOUR CODE HERE
+		if (msg.value > getHighestBid() && msg.value > 0) {
+			refunds[getHighestBidder()] = getHighestBid();
+			highestBid = msg.value;
+			highestBidder = msg.sender;
+			return true;
+		} else {
+			refunds[msg.sender] = msg.value;
+			return false;
+		}
 	}
 
 	/*  Implement withdraw function to complete new 
@@ -23,6 +32,7 @@ contract GoodAuction is AuctionInterface {
 	    or no funds owed.  */
 	function withdrawRefund() external returns(bool) {
 		// YOUR CODE HERE
+		if
 	}
 
 	/*  Allow users to check the amount they are owed
