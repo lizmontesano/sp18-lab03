@@ -1,4 +1,4 @@
-pragma solidity 0.4.19;
+pragma solidity ^0.4.19;
 
 import "./AuctionInterface.sol";
 
@@ -6,7 +6,7 @@ import "./AuctionInterface.sol";
 contract GoodAuction is AuctionInterface {
 
 	/* New data structure, keeps track of refunds owed */
-	mapping(address => uint) refunds;
+	mapping(address => uint256) refunds;
 
 
 	/* 	Bid function, now shifted to pull paradigm
@@ -15,24 +15,26 @@ contract GoodAuction is AuctionInterface {
 		allow people to retrieve their funds  */
 	function bid() payable external returns(bool) {
 		// YOUR CODE HERE
-		if (msg.value > highestBid) {
+        if (msg.value > highestBid) {
 			refunds[highestBidder] += highestBid;
 			highestBid = msg.value;
 			highestBidder = msg.sender;
 			return true;
+        }
 		else {
-			msg.sender.send(msg.value);
+			msg.sender.transfer(msg.value);
 			return false;
+		}
 	}
 
 	/*  Implement withdraw function to complete new 
 	    pull paradigm. Returns true on successful 
 	    return of owed funds and false on failure
 	    or no funds owed.  */
-	function withdrawRefund() external returns(bool) {
+	function withdrawRefund() public returns(bool) {
 		// YOUR CODE HERE
 		if (refunds[msg.sender] > 0) {
-			msg.sender.send(refunds[msg.sender]);
+			msg.sender.transfer(refunds[msg.sender]);
 			refunds[msg.sender] = 0;
 			return true;
 		}
@@ -42,7 +44,7 @@ contract GoodAuction is AuctionInterface {
 	/*  Allow users to check the amount they are owed
 		before calling withdrawRefund(). Function returns
 		amount owed.  */
-	function getMyBalance() constant external returns(uint) {
+	function getMyBalance() constant public returns(uint256) {
 		return refunds[msg.sender];
 	}
 
@@ -51,7 +53,7 @@ contract GoodAuction is AuctionInterface {
 		and applying it to the reduceBid function 
 		you fill in below. */
 	modifier canReduce() {
-		require(msg.sender == highestBidder);
+	    require(msg.sender == getHighestBidder());
 		_;
 	}
 
@@ -59,12 +61,12 @@ contract GoodAuction is AuctionInterface {
 	/*  Rewrite reduceBid from BadAuction to fix
 		the security vulnerabilities. Should allow the
 		current highest bidder only to reduce their bid amount */
-	function reduceBid() external canReduce() {
-		/* difference is modifier canReduce() */
-		if (highestBid >= 0) {
-	        require(highestBid-1 >= 0);
+	function reduceBid() external {
+	    /* difference is modifier canReduce() */
+		if (getHighestBid() >= 0) {
+	        require(getHighestBid()-1 >= 0);
 			highestBid = highestBid - 1;
-			require(highestBidder.send(1));
+			require(getHighestBidder().send(1));
 	    } else {
 	    	revert();
 	    }
@@ -84,3 +86,4 @@ contract GoodAuction is AuctionInterface {
 	}
 
 }
+
