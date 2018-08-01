@@ -1,4 +1,4 @@
-pragma solidity 0.4.19;
+pragma solidity ^0.4.19;
 
 import "./AuctionInterface.sol";
 
@@ -14,17 +14,17 @@ contract BadAuction is AuctionInterface {
 	 */
 	function bid() payable external returns (bool) {
 		// YOUR CODE HERE
-		if (msg.value > highestBid) {
-			if (highestBidder.send(highestBid)) {
+		if (msg.value > getHighestBid()) {
+			if (getHighestBidder().send(getHighestBid())) {
 				highestBid = msg.value;
 				highestBidder = msg.sender;
 				return true;
 				/* Problem is here because you set the new highest bid and bidder before refunding previous highest bidder */
 			}
-			msg.sender.send(msg.value);
+			msg.sender.transfer(msg.value);
 			return false;
 		}
-		msg.sender.send(msg.value);
+		msg.sender.transfer(msg.value);
 		return false;
 	}
 
@@ -36,9 +36,9 @@ contract BadAuction is AuctionInterface {
 		implement the function properly in GoodAuction.sol  */
 	
 	function reduceBid() external {
-	    if (highestBid >= 0) {
+	    if (getHighestBid() >= 0) {
 	        highestBid = highestBid - 1;
-	        require(highestBidder.send(1));
+	        require(getHighestBidder().send(1));
 	    } else {
 	    	revert();
 	    }
@@ -52,7 +52,7 @@ contract BadAuction is AuctionInterface {
 		want to profit on people's mistakes.
 		How do we send people their money back?  */
 
-	function () payable {
+	function() payable {
 		// YOUR CODE HERE
 		revert();
 	}
